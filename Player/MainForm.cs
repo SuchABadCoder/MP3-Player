@@ -1,6 +1,4 @@
-﻿using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Data;
 using System.Drawing;
 using System.IO;
@@ -8,13 +6,13 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using WMPLib;
+using Model;
 
-namespace Player
+namespace View
 {
     public partial class MainForm : Form
     {
-        private readonly string coverImage = @"Image\cover.jpg", 
-            unknown = "Unknown", source = "Storage/source";
+        private readonly string coverImage = @"Image\cover.jpg";
 
         private double currentPosition = 0;
         private int plstN = 0, counter = 0;
@@ -26,8 +24,7 @@ namespace Player
         private WindowsMediaPlayer player = new WindowsMediaPlayer();
         private DateTime date = new DateTime(0, 0);
         private AllSongs songs = new AllSongs();
-        private List<DirectoryInfo> dirStorage = new List<DirectoryInfo>();
-        private List<string> playlists = new List<string>();
+        private Storage storage = new Storage();
         public delegate void InvokeDelegate();
 
         public MainForm()
@@ -39,12 +36,13 @@ namespace Player
         private void Form1_Load(object sender, EventArgs e)
         {
             AlbumCover.Image = Image.FromFile(coverImage);
-            Deserialize();
+            storage.Deserialize();
+            FillListBox_AllSongs();
         }
 
         private void MainForm_FormClosed(object sender, FormClosedEventArgs e)
         {
-            Serialize();
+            storage.Serialize();
         }
 
         private void Player_PlayStateChange(int NewState)
@@ -122,8 +120,8 @@ namespace Player
                 DateTime current = date.AddSeconds((int)songDuration);
                 lbDuration.Text = current.ToString("mm:ss");
 
-                lbTitle.Text = audioFile.Tag.Title ?? unknown;
-                lbArtist.Text = audioFile.Tag.Performers.FirstOrDefault() ?? unknown;
+                lbTitle.Text = audioFile.Tag.Title ?? "Unknown";
+                lbArtist.Text = audioFile.Tag.Performers.FirstOrDefault() ?? "Unknown";
 
                 AlbumCover.Image = null;
 
@@ -187,7 +185,7 @@ namespace Player
         {
             lbAllSongs.Visible = true;
             lbPlaylists.Visible = false;
-            FillListBox_AllSongs(songs);
+            FillListBox_AllSongs();
         }
 
         private async void directoryToolStripMenuItem_Click(object sender, EventArgs e) //Open -> Directory
@@ -195,11 +193,14 @@ namespace Player
             if (folderBrowserDialog.ShowDialog() == DialogResult.Cancel)
                 return;
 
-            dirStorage.Add(new DirectoryInfo(folderBrowserDialog.SelectedPath));
+            Storage.Dir.Add(new DirectoryInfo(folderBrowserDialog.SelectedPath));
 
-            await Task.Run(() => LoadSongs());
-            FillListBox_AllSongs(songs);
-
+            await Task.Run(() => {
+                BeginInvoke(new InvokeDelegate(() => Cursor = Cursors.AppStarting));
+                AllSongs.LoadSongs();
+                BeginInvoke(new InvokeDelegate(() => Cursor = Cursors.Default));
+            });
+            FillListBox_AllSongs();
             lbAllSongs.Visible = true;
         }
 
@@ -209,7 +210,7 @@ namespace Player
             lbPlaylists.DisplayMember = "Performer";
             plstN = 0;
 
-            var result = songs.Songs.GroupBy(x => x.Performer).Select(x => x.First()).ToList();
+            var result = AllSongs.Songs.GroupBy(x => x.Performer).Select(x => x.First()).ToList();
             for (int i = 0; i < result.Count; i++)
                 lbPlaylists.Items.Add(result[i]);
         }
@@ -220,7 +221,7 @@ namespace Player
             lbPlaylists.DisplayMember = "Genre";
             plstN = 1;
 
-            var result = songs.Songs.GroupBy(x => x.Genre).Select(x => x.First()).ToList();
+            var result = AllSongs.Songs.GroupBy(x => x.Genre).Select(x => x.First()).ToList();
             for (int i = 0; i < result.Count; i++)
                 lbPlaylists.Items.Add(result[i]);
         }
@@ -231,7 +232,7 @@ namespace Player
             lbPlaylists.DisplayMember = "Year";
             plstN = 2;
 
-            var result = songs.Songs.GroupBy(x => x.Year).Select(x => x.First()).ToList();
+            var result = AllSongs.Songs.GroupBy(x => x.Year).Select(x => x.First()).ToList();
             for (int i = 0; i < result.Count; i++)
                 lbPlaylists.Items.Add(result[i]);
         }
@@ -242,7 +243,7 @@ namespace Player
             lbPlaylists.DisplayMember = "Album";
             plstN = 3;
 
-            var result = songs.Songs.GroupBy(x => x.Album).Select(x => x.First()).ToList();
+            var result = AllSongs.Songs.GroupBy(x => x.Album).Select(x => x.First()).ToList();
             for (int i = 0; i < result.Count; i++)
                 lbPlaylists.Items.Add(result[i]);
         }
@@ -257,22 +258,22 @@ namespace Player
                 switch (plstN)
                 {
                     case 0: //performer
-                        var result = songs.Songs.Where(x => x.Performer == song.Performer).ToList();
+                        var result = AllSongs.Songs.Where(x => x.Performer == song.Performer).ToList();
                         for (int i = 0; i < result.Count; i++)
                             lbAllSongs.Items.Add(result[i]);
                         break;
                     case 1: //Genre
-                        result = songs.Songs.Where(x => x.Genre == song.Genre).ToList();
+                        result = AllSongs.Songs.Where(x => x.Genre == song.Genre).ToList();
                         for (int i = 0; i < result.Count; i++)
                             lbAllSongs.Items.Add(result[i]);
                         break;
                     case 2: //Year
-                        result = songs.Songs.Where(x => x.Year == song.Year).ToList();
+                        result = AllSongs.Songs.Where(x => x.Year == song.Year).ToList();
                         for (int i = 0; i < result.Count; i++)
                             lbAllSongs.Items.Add(result[i]);
                         break;
                     case 3: //Album
-                        result = songs.Songs.Where(x => x.Album == song.Album).ToList();
+                        result = AllSongs.Songs.Where(x => x.Album == song.Album).ToList();
                         for (int i = 0; i < result.Count; i++)
                             lbAllSongs.Items.Add(result[i]);
                         break;
@@ -284,47 +285,18 @@ namespace Player
             }
         }
 
-        private void LoadSongs() //сканирует все директории и загружает треки в список
-        {
-            songs.Songs.Clear();
-            BeginInvoke(new InvokeDelegate(() => Cursor = Cursors.AppStarting));
-            foreach (var directory in dirStorage)
-            {
-                try
-                {
-                    FileInfo[] files = directory.GetFiles("*.mp3");
-                    foreach (var file in files)
-                    {
-                            var audioFile = TagLib.File.Create(file.FullName);
-                            var song = new Song(audioFile.Tag.Title ?? unknown,
-                                audioFile.Tag.Performers.FirstOrDefault() ?? unknown,
-                                audioFile.Tag.Year,
-                                audioFile.Tag.Album ?? unknown,
-                                audioFile.Tag.Genres.FirstOrDefault() ?? unknown,
-                                file.FullName);
-                            songs.Songs.Add(song);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-            }
-            BeginInvoke(new InvokeDelegate(() => Cursor = Cursors.Default));
-        }
-
         private void playerToolStripMenuItem_Click(object sender, EventArgs e)
         {
             lbPlaylists.Visible = false;
             lbAllSongs.Visible = false;
         }
 
-        private void FillListBox_AllSongs(AllSongs list)
+        private void FillListBox_AllSongs()
         {
             lbAllSongs.Items.Clear();
             lbAllSongs.DisplayMember = "Title";
-            for (int i = 0; i < list.Songs.Count; i++)
-                lbAllSongs.Items.Add(list.Songs[i]);
+            for (int i = 0; i < AllSongs.Songs.Count; i++)
+                lbAllSongs.Items.Add(AllSongs.Songs[i]);
         }
 
         private void btBack_Click(object sender, EventArgs e) //back
@@ -372,45 +344,11 @@ namespace Player
             lbTitle.Text = text;
         }
 
-        private void toolStripDropDownButton2_DropDownItemClicked(object sender, ToolStripItemClickedEventArgs e)
-        {
-            player.settings.setMode("shuffle", false);
-            toolStripButton1.Checked = false;
-        }
-
         private void ShowPlaylists()
         {
             lbPlaylists.Visible = true;
             lbAllSongs.Visible = false;
             lbPlaylists.Items.Clear();
-        }
-
-        private void Serialize()
-        {
-            var storage = new Storage();
-            storage.Dir = dirStorage;
-            string json = JsonConvert.SerializeObject(storage);
-            using (StreamWriter sw = new StreamWriter(source, false, System.Text.Encoding.Default))
-            {
-                sw.WriteLine(json);
-            }
-        }
-
-        private async void Deserialize()
-        {
-            try
-            {
-                using (StreamReader sr = new StreamReader(source))
-                {
-                    string json = sr.ReadToEnd();
-                    var storage = new Storage();
-                    storage = JsonConvert.DeserializeObject<Storage>(json);
-                    dirStorage = storage.Dir;
-                    await Task.Run(() => LoadSongs());
-                    FillListBox_AllSongs(songs);
-                }
-            }
-            catch { }
         }
     }
 }

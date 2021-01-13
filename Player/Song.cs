@@ -1,4 +1,4 @@
-﻿namespace Player
+﻿namespace Model
 {
     class Song
     {

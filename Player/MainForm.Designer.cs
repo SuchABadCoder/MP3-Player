@@ -1,4 +1,4 @@
-﻿namespace Player
+﻿namespace View
 {
     partial class MainForm
     {
@@ -45,6 +45,7 @@
             this.directoryToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.playerToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.btBack = new System.Windows.Forms.ToolStripButton();
+            this.toolStripButton1 = new System.Windows.Forms.ToolStripButton();
             this.folderBrowserDialog = new System.Windows.Forms.FolderBrowserDialog();
             this.trackBar = new System.Windows.Forms.TrackBar();
             this.btNext = new System.Windows.Forms.Button();
@@ -54,7 +55,6 @@
             this.lbArtist = new System.Windows.Forms.Label();
             this.lbAllSongs = new System.Windows.Forms.ListBox();
             this.lbPlaylists = new System.Windows.Forms.ListBox();
-            this.toolStripButton1 = new System.Windows.Forms.ToolStripButton();
             this.TextTimer = new System.Windows.Forms.Timer(this.components);
             ((System.ComponentModel.ISupportInitialize)(this.AlbumCover)).BeginInit();
             this.toolStrip1.SuspendLayout();
@@ -122,12 +122,11 @@
             this.toolStripDropDownButton2.Name = "toolStripDropDownButton2";
             this.toolStripDropDownButton2.Size = new System.Drawing.Size(49, 22);
             this.toolStripDropDownButton2.Text = "Open";
-            this.toolStripDropDownButton2.DropDownItemClicked += new System.Windows.Forms.ToolStripItemClickedEventHandler(this.toolStripDropDownButton2_DropDownItemClicked);
             // 
             // allSongsToolStripMenuItem
             // 
             this.allSongsToolStripMenuItem.Name = "allSongsToolStripMenuItem";
-            this.allSongsToolStripMenuItem.Size = new System.Drawing.Size(122, 22);
+            this.allSongsToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.allSongsToolStripMenuItem.Text = "Songs";
             this.allSongsToolStripMenuItem.Click += new System.EventHandler(this.allSongsToolStripMenuItem_Click);
             // 
@@ -139,7 +138,7 @@
             this.yearToolStripMenuItem,
             this.albumToolStripMenuItem});
             this.playlistsToolStripMenuItem.Name = "playlistsToolStripMenuItem";
-            this.playlistsToolStripMenuItem.Size = new System.Drawing.Size(122, 22);
+            this.playlistsToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.playlistsToolStripMenuItem.Text = "Playlists";
             // 
             // performerToolStripMenuItem
@@ -173,14 +172,14 @@
             // directoryToolStripMenuItem
             // 
             this.directoryToolStripMenuItem.Name = "directoryToolStripMenuItem";
-            this.directoryToolStripMenuItem.Size = new System.Drawing.Size(122, 22);
+            this.directoryToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.directoryToolStripMenuItem.Text = "Directory";
             this.directoryToolStripMenuItem.Click += new System.EventHandler(this.directoryToolStripMenuItem_Click);
             // 
             // playerToolStripMenuItem
             // 
             this.playerToolStripMenuItem.Name = "playerToolStripMenuItem";
-            this.playerToolStripMenuItem.Size = new System.Drawing.Size(122, 22);
+            this.playerToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.playerToolStripMenuItem.Text = "Player";
             this.playerToolStripMenuItem.Click += new System.EventHandler(this.playerToolStripMenuItem_Click);
             // 
@@ -193,6 +192,16 @@
             this.btBack.Size = new System.Drawing.Size(36, 22);
             this.btBack.Text = "Back";
             this.btBack.Click += new System.EventHandler(this.btBack_Click);
+            // 
+            // toolStripButton1
+            // 
+            this.toolStripButton1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.toolStripButton1.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton1.Image")));
+            this.toolStripButton1.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButton1.Name = "toolStripButton1";
+            this.toolStripButton1.Size = new System.Drawing.Size(48, 22);
+            this.toolStripButton1.Text = "Shuffle";
+            this.toolStripButton1.Click += new System.EventHandler(this.toolStripButton1_Click);
             // 
             // trackBar
             // 
@@ -277,16 +286,6 @@
             this.lbPlaylists.TabIndex = 13;
             this.lbPlaylists.Visible = false;
             this.lbPlaylists.SelectedIndexChanged += new System.EventHandler(this.lbPlaylists_SelectedIndexChanged);
-            // 
-            // toolStripButton1
-            // 
-            this.toolStripButton1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.toolStripButton1.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton1.Image")));
-            this.toolStripButton1.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolStripButton1.Name = "toolStripButton1";
-            this.toolStripButton1.Size = new System.Drawing.Size(48, 22);
-            this.toolStripButton1.Text = "Shuffle";
-            this.toolStripButton1.Click += new System.EventHandler(this.toolStripButton1_Click);
             // 
             // TextTimer
             // 

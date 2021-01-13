@@ -110,3 +110,4 @@ C:\Users\USER\source\repos\Player\Player\obj\Release\Player.csproj.CoreCompileIn
 C:\Users\USER\source\repos\Player\Player\obj\Release\Player.csproj.CopyComplete
 C:\Users\USER\source\repos\Player\Player\obj\Release\Player.exe
 C:\Users\USER\source\repos\Player\Player\obj\Release\Player.pdb
+C:\Users\USER\source\repos\Player\Player\obj\Release\Player.csprojAssemblyReference.cache
